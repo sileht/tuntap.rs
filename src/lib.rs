@@ -1,12 +1,15 @@
 #![allow(dead_code)]
-
+#![feature(core)]
+#![feature(io)]
+#![feature(libc)]
+#![feature(std_misc)]
+#[macro_use] extern crate bitflags;
 #[macro_use] extern crate log;
 extern crate libc;
 
-use tuntap::{TunTap,IFF_TUN,IFF_TAP,IFF_NO_PI};
-use std::thread::Thread;
+pub use tuntap::{TunTap,IFF_TUN,IFF_TAP,IFF_NO_PI};
 
-mod tuntap;
+pub mod tuntap;
 
 #[test]
 fn it_works() {
@@ -38,4 +41,4 @@ fn it_works() {
 		tx1.send(packet).unwrap();
 	}
 }
-	
+

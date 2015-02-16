@@ -1,4 +1,5 @@
-use std::io::{File, Open, ReadWrite};
+
+use std::old_io::{File, Open, ReadWrite};
 use std::default::Default;
 use std::os::unix::prelude::{AsRawFd, Fd};
 use libc::funcs::posix88::unistd::write;
@@ -6,13 +7,13 @@ use libc::funcs::bsd43::socket;
 use libc::consts::os::bsd44::{AF_INET,AF_INET6,SOCK_DGRAM};
 use libc::types::common::c95::{c_void};
 use libc::types::os::arch::c95::{c_char,c_ulong,c_ushort,c_int};
-use std::io::{IoResult,IoError};
+use std::old_io::{IoResult,IoError};
 use libc::types::os::common::bsd44::{sockaddr_in,sockaddr,in_addr,in6_addr};
 
 use std::sync::mpsc::{channel,Sender,Receiver};
 use std::thread::Thread;
 
-const IFNAMSIZ: uint = 16;
+const IFNAMSIZ: usize = 16;
 
 #[repr(C)]
 struct InterfaceRequest16 {
@@ -50,7 +51,7 @@ impl Default for InterfaceRequest16 {
 		InterfaceRequest16 {
 			name: [0; IFNAMSIZ],
 			flags: 0,
-		}		
+		}
 	}
 }
 
@@ -59,7 +60,7 @@ impl Default for InterfaceRequest32 {
 		InterfaceRequest32 {
 			name: [0; IFNAMSIZ],
 			flags: 0,
-		}		
+		}
 	}
 }
 
@@ -75,7 +76,7 @@ impl Default for InterfaceRequestSockaddrIn {
 				},
 				sin_zero:   [0;8],
 			}
-		}		
+		}
 	}
 }
 
@@ -87,12 +88,12 @@ impl Default for InterfaceRequestSockaddr {
 				sa_family: 0,
 				sa_data:   [0;14]
 			}
-		}		
+		}
 	}
 }
 
-type Uid = u32;
-type Gid = u32;
+pub type Uid = u32;
+pub type Gid = u32;
 
 extern "C" {
 	fn ioctl(fd: i32, icr: IoCtlRequest, some: c_ulong) -> i32;
@@ -201,7 +202,7 @@ impl TunTap {
 					write(fd, ptr as *const c_void, packet.len() as u64);
 				}
 			}
-		}).detach();
+		}); //.detach();
 
 		Thread::spawn(move || {
 			loop {
@@ -211,7 +212,7 @@ impl TunTap {
 					_ => break
 				};
 			}
-		}).detach();
+		}); //.detach();
 
 		Ok((tuntap,(your_tx,your_rx)))
 	}
