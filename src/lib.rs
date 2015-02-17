@@ -3,19 +3,21 @@
 #![feature(io)]
 #![feature(libc)]
 #![feature(std_misc)]
+#![feature(macro_rules)]
 #[macro_use] extern crate bitflags;
 #[macro_use] extern crate log;
 extern crate libc;
 
 pub use tuntap::{TunTap,IFF_TUN,IFF_TAP,IFF_NO_PI};
+use std::thread::Thread;
 
 pub mod tuntap;
 
 #[test]
 fn it_works() {
 	let flags = IFF_TUN | IFF_NO_PI;
-	let (tun1, (tx1,rx1)) = TunTap::new(flags).unwrap();
-	let (tun2, (tx2,rx2)) = TunTap::new(flags).unwrap();
+	let (tun1, (tx1,rx1)) = TunTap::new("tap12", flags).unwrap();
+	let (tun2, (tx2,rx2)) = TunTap::new("tap14", flags).unwrap();
 
 	for (i, tun) in [tun1, tun2].iter().enumerate() {
 		tun.set_owner(1001).unwrap();
@@ -36,7 +38,7 @@ fn it_works() {
 		for packet in rx1.iter() {
 			tx2.send(packet).unwrap();
 		}
-	}).detach();
+	});
 	for packet in rx2.iter() {
 		tx1.send(packet).unwrap();
 	}

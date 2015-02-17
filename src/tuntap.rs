@@ -10,6 +10,7 @@ use libc::types::os::arch::c95::{c_char,c_ulong,c_ushort,c_int};
 use std::old_io::{IoResult,IoError};
 use libc::types::os::common::bsd44::{sockaddr_in,sockaddr,in_addr,in6_addr};
 
+use std::cmp;
 use std::sync::mpsc::{channel,Sender,Receiver};
 use std::thread::Thread;
 
@@ -153,7 +154,7 @@ macro_rules! ioctl(
 );
 
 impl TunTap {
-	pub fn new(flags: TunTapFlags)
+	pub fn new(name: &str, flags: TunTapFlags)
 		-> IoResult<(TunTap,(Sender<Vec<u8>>,Receiver<Vec<u8>>))>
 	{
 		let p = Path::new("/dev/net/tun");
@@ -163,9 +164,14 @@ impl TunTap {
 				return Err(e);
 			}
 		};
-
+        let mut b_name: [u8; IFNAMSIZ] = [0; IFNAMSIZ];
+        let mut in_name = name.to_string();
+        for i in range(0, cmp::min(IFNAMSIZ, in_name.len())) {
+            b_name[i] = in_name.as_bytes()[i];
+        }
 		let ifr_create = InterfaceRequest16 {
 			flags: flags.bits(),
+            name: b_name,
 			..Default::default()
 		};
 		let create = unsafe { ioctl!(file.as_raw_fd(), TUNSETIFF, &ifr_create) };
