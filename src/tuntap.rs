@@ -254,7 +254,7 @@ impl TunTap {
 		unsafe { ioctl!(self.sock4, SIOCSIFHWADDR, &ifr) }
 	}*/
 
-	pub fn set_ipv4(self, ipv4: &'static str) -> IoResult<()> {
+	pub fn set_ipv4(self, ipv4: &str) -> IoResult<()> {
 		let mut ifr_ipaddr = InterfaceRequestSockaddrIn {
 			name:     self.name,
 			..Default::default()
@@ -270,7 +270,7 @@ impl TunTap {
 		unsafe { ioctl!(self.sock4, SIOCSIFADDR, &ifr_ipaddr) }
 	}
 
-	pub fn set_ipv6(self, ipv6: &'static str) -> IoResult<()> {
+	pub fn set_ipv6(self, ipv6: &str) -> IoResult<()> {
 		let mut ifr = InterfaceRequest32 {
 			name: self.name,
 			..Default::default()
